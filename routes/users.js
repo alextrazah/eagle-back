@@ -36,6 +36,28 @@ router.get("/", function (req, res, next) {
   );
 });
 
+router.get("/test", function (req, res, next) {
+  const username = req.query.username;
+  const password = req.query.password;
+
+  User.find(
+    { $or: [{ Username: username }, { Email: username }] },
+    async function (err, data) {
+      if (err) throw err;
+      if (data.length === 0) {
+        console.log(data);
+        console.log(password);
+        return res.send("UserNotFound");
+      } else if ((await bcrypt.compare(password, data[0].Password)) === false) {
+        console.log("WrongPassword");
+        return res.send("WrongPassword");
+      } else {
+        res.json(data);
+      }
+    }
+  );
+});
+
 /** LOGIN WITH GOOGLE **/
 router.get("/loginWithGoogle", function (req, res, next) {
   const tokenId = req.query.tokenId;
